@@ -69,22 +69,11 @@ def get_ada_embedding(text):
 
 def openai_call(prompt: str, use_gpt4: bool = False, temperature: float = 0.5, max_tokens: int = 100):
     if not use_gpt4:
-        #Call GPT-3 DaVinci model
-        response = openai.Completion.create(
-            engine='text-davinci-003',
-            prompt=prompt,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
-        )
-        return response.choices[0].text.strip()
-    else:
-        #Call GPT-4 chat model
+        # MODEL = "gpt-3.5-turbo"
+        #Call "gpt-3.5-turbo" chat model
         messages=[{"role": "user", "content": prompt}]
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages = messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -92,6 +81,29 @@ def openai_call(prompt: str, use_gpt4: bool = False, temperature: float = 0.5, m
             stop=None,
         )
         return response.choices[0].message.content.strip()
+        # message = response["choices"][0]["message"]["content"]
+        # response = openai.Completion.create(
+        #     engine='text-davinci-003',
+        #     prompt=prompt,
+        #     temperature=temperature,
+        #     max_tokens=max_tokens,
+        #     top_p=1,
+        #     frequency_penalty=0,
+        #     presence_penalty=0
+        # )
+        # return response.choices[0].text.strip()
+    # else:
+    #     #Call GPT-4 chat model
+    #     messages=[{"role": "user", "content": prompt}]
+    #     response = openai.ChatCompletion.create(
+    #         model="gpt-4",
+    #         messages = messages,
+    #         temperature=temperature,
+    #         max_tokens=max_tokens,
+    #         n=1,
+    #         stop=None,
+    #     )
+    #     return response.choices[0].message.content.strip()
 
 def task_creation_agent(objective: str, result: Dict, task_description: str, task_list: List[str], gpt_version: str = 'gpt-3'):
     prompt = f"You are an task creation AI that uses the result of an execution agent to create new tasks with the following objective: {objective}, The last completed task has the result: {result}. This result was based on this task description: {task_description}. These are incomplete tasks: {', '.join(task_list)}. Based on the result, create new tasks to be completed by the AI system that do not overlap with incomplete tasks. Return the tasks as an array."
@@ -123,7 +135,8 @@ def execution_agent(objective:str,task: str, gpt_version: str = 'gpt-3') -> str:
     #print("\n*******RELEVANT CONTEXT******\n")
     #print(context)
     prompt =f"You are an AI who performs one task based on the following objective: {objective}.\nTake into account these previously completed tasks: {context}\nYour task: {task}\nResponse:"
-    return openai_call(prompt, USE_GPT4, 0.7, 2000)
+    return openai_call(prompt, USE_GPT4, 0.7, 200)
+    # return openai_call(prompt, USE_GPT4, 0.7, 2000)
 
 def context_agent(query: str, index: str, n: int):
     query_embedding = get_ada_embedding(query)
@@ -144,7 +157,10 @@ first_task = {
 add_task(first_task)
 # Main loop
 task_id_counter = 1
-while True:
+# while True:
+start_time = time.time()
+print(start_time)
+while (abs(time.time() - start_time) < 60) and True:
     if task_list:
         # Print the task list
         print("\033[95m\033[1m"+"\n*****TASK LIST*****\n"+"\033[0m\033[0m")
@@ -178,3 +194,4 @@ while True:
     prioritization_agent(this_task_id)
 
     time.sleep(1)  # Sleep before checking the task list again
+    print(f'countdown to program termination: {30 - time.time() - start_time}')

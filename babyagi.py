@@ -159,10 +159,12 @@ add_task(first_task)
 task_id_counter = 1
 # while True:
 start_time = time.time()
-print(start_time)
-while (abs(time.time() - start_time) < 60) and True:
+max_time = 10
+while (time.time() - (start_time + max_time) < 0) and True:
     if task_list:
         # Print the task list
+        print(f'countdown to program termination: {time.time() - (start_time + max_time)}')
+        
         print("\033[95m\033[1m"+"\n*****TASK LIST*****\n"+"\033[0m\033[0m")
         for t in task_list:
             print(str(t['task_id'])+": "+t['task_name'])
@@ -188,10 +190,11 @@ while (abs(time.time() - start_time) < 60) and True:
     new_tasks = task_creation_agent(OBJECTIVE,enriched_result, task["task_name"], [t["task_name"] for t in task_list])
 
     for new_task in new_tasks:
+        print(f'countdown to program termination: {time.time() - (start_time + max_time)}')
         task_id_counter += 1
         new_task.update({"task_id": task_id_counter})
         add_task(new_task)
     prioritization_agent(this_task_id)
 
     time.sleep(1)  # Sleep before checking the task list again
-    print(f'countdown to program termination: {30 - time.time() - start_time}')
+    print(f'countdown to program termination: {time.time() - (start_time + max_time)}')
